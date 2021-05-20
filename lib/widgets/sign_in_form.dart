@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/validators/email_validator.dart';
-import 'package:flutter_application_1/validators/password_validator.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../bloc/auth_bloc.dart';
-import '../bloc/auth_event.dart';
+import '../bloc/authentication/authentication_bloc.dart';
+import '../bloc/authentication/authentication_event.dart';
+import '../validators/email_validator.dart';
+import '../validators/password_validator.dart';
 
 class SignInForm extends StatefulWidget {
-  final AuthBloc _authBloc;
-
-  SignInForm(this._authBloc);
-
   @override
   _SignInFormState createState() => _SignInFormState();
 }
@@ -24,12 +21,11 @@ class _SignInFormState extends State<SignInForm> {
   String _email;
   String _password;
 
-  void _saveForm() {
+  void _saveForm(BuildContext context) {
     if (_formKey.currentState.validate()) {
       setState(() => _signInProces = true);
       _formKey.currentState.save();
-      var signInEvent = SignInEvent(_email, _password);
-      widget._authBloc.inputEventSink.add(signInEvent);
+      context.read<AuthenticationBloc>().add(SignInEvent(_email, _password));
     }
   }
 
@@ -111,7 +107,7 @@ class _SignInFormState extends State<SignInForm> {
                     ),
                     child: const Text('Sign In!'),
                     onPressed: () {
-                      _saveForm();
+                      _saveForm(context);
                     }),
           ),
         ],

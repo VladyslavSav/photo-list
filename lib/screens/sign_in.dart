@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../bloc/auth_bloc.dart';
 import '../widgets/sign_in_form.dart';
 
 class SignInScreen extends StatelessWidget {
-  final AuthBloc _authBloc;
-
-  SignInScreen(this._authBloc);
-
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
@@ -31,7 +26,7 @@ class SignInScreen extends StatelessWidget {
               ),
             ),
             Center(
-              child: SignInForm(_authBloc),
+              child: SignInForm(),
             ),
           ],
         ),

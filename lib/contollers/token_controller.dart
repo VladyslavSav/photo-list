@@ -17,7 +17,7 @@ class TokenController {
   Future<bool> load() {
     return prefs.then((value) {
       _token = value.getString("token");
-      return (_token == null);
+      return (_token != null);
     });
   }
 

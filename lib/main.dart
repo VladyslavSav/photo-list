@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/screens/error.dart';
+import 'package:flutter_application_1/bloc/authentication/authentication_event.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import './bloc/auth_bloc.dart';
-import './bloc/auth_event.dart';
-import './bloc/auth_state.dart';
+import './bloc/authentication/authentication_state.dart';
 import './screens/home.dart';
 import './screens/sign_in.dart';
+import './bloc/authentication/authentication_bloc.dart';
 
 void main() {
-  runApp(MyApp());
+  Bloc.observer = BlocObserver();
+  runApp(BlocProvider<AuthenticationBloc>(
+      create: (context) => AuthenticationBloc(), child: MyApp()));
 }
 
 class MyApp extends StatefulWidget {
@@ -17,39 +19,33 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final AuthBloc _authBloc = AuthBloc();
-
   @override
   Widget build(BuildContext context) {
-    _authBloc.inputEventSink.add(ProcesEvent());
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: StreamBuilder<AuthState>(
-        stream: _authBloc.outputStateStream,
-        initialData: AuthState.Proces,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            if (snapshot.data == AuthState.SignOuted)
-              return SignInScreen(_authBloc);
-            else if (snapshot.data == AuthState.SignIned)
-              return HomeScreen(_authBloc);
-            return Center(
-              child: CircularProgressIndicator(),
-            );
-          } else {
-            return ErrorScreen(snapshot.error.toString(), _authBloc);
-          }
-        },
-      ),
-    );
-  }
+      home:
+          //BlocProvider<AuthenticationBloc>(
 
-  @override
-  void dispose() {
-    _authBloc.dispose();
-    super.dispose();
+          BlocBuilder<AuthenticationBloc, AuthenticationState>(
+              buildWhen: (previous, current) {
+                return previous != current;
+              },
+              bloc: context.read<AuthenticationBloc>(),
+              builder: (context, state) {
+                if (state is SignOuted) {
+                  return SignInScreen();
+                } else if (state is SignIned) {
+                  return HomeScreen();
+                } else if (state is UnInitialized) {
+                  context.read<AuthenticationBloc>().add(InitializingEvent());
+                }
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }),
+    );
   }
 }

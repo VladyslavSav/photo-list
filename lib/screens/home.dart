@@ -1,26 +1,27 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../bloc/auth_bloc.dart';
-import '../bloc/auth_event.dart';
+import '../bloc/photo/photo_bloc.dart';
+import '../bloc/authentication/authentication_bloc.dart';
+import '../bloc/authentication/authentication_event.dart';
 import '../widgets/photo_list.dart';
 
 class HomeScreen extends StatelessWidget {
-  final AuthBloc _authBloc;
-  HomeScreen(this._authBloc);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.exit_to_app_outlined),
         onPressed: () {
-          _authBloc.inputEventSink.add(SignOutEvent());
+          context.read<AuthenticationBloc>().add(SignOutEvent());
         },
       ),
-      body: LayoutBuilder(builder: (context, constraints) {
-        return PhotoList(constraints);
-      }),
+      body: BlocProvider<PhotoBloc>(
+        create: (context) => PhotoBloc(),
+        child: LayoutBuilder(builder: (context, constraints) {
+          return PhotoList(constraints);
+        }),
+      ),
     );
   }
 }

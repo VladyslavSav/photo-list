@@ -1,8 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/bloc/photo/photo_event.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../bloc/photo_bloc.dart';
-import '../bloc/photo_event.dart';
+import '../bloc/photo/photo_bloc.dart';
+import '../bloc/photo/photo_state.dart';
 import '../models/photo.dart';
 
 class PhotoList extends StatefulWidget {
@@ -15,29 +16,26 @@ class PhotoList extends StatefulWidget {
 }
 
 class _PhotoListState extends State<PhotoList> {
-  final PhotoBloc _photoBloc = PhotoBloc();
   @override
   Widget build(BuildContext context) {
-    _photoBloc.fetchProces.add(PhotoEvent.Fetch);
-    return StreamBuilder<List<Photo>>(
-      stream: _photoBloc.fetch,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
+    context.read<PhotoBloc>().add(FetchPhotoEvent());
+    return BlocBuilder<PhotoBloc, PhotoState>(
+      builder: (context, state) {
+        if (state is FetchedState) {
           return ListView.builder(
-            itemCount: snapshot.data.length,
+            itemCount: state.photoList.length,
             itemBuilder: (context, index) {
               return Padding(
-                child: _buildPhoto(snapshot.data[index]),
+                child: _buildPhoto(state.photoList[index]),
                 padding: const EdgeInsets.all(2),
               );
             },
           );
-        } else if (snapshot.hasError) {
-          return Text(snapshot.error.toString());
+        } else {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
         }
-        return Center(
-          child: CircularProgressIndicator(),
-        );
       },
     );
   }
@@ -63,11 +61,5 @@ class _PhotoListState extends State<PhotoList> {
               );
       },
     );
-  }
-
-  @override
-  void dispose() {
-    _photoBloc.dispose();
-    super.dispose();
   }
 }
